@@ -1,14 +1,62 @@
 # dsh-custom-skin
 
-DeepSeek Harness Web 的自定义壁纸插件。它在设置页增加“个性化 / Wallpaper”页面，支持：
+<p align="center">
+  Custom wallpapers and translucent skins for DeepSeek Harness Web.
+</p>
 
-- 上传或拖入多张本地图片，并一键切换；
-- 显示/隐藏、删除单张图片、清空图片库；
-- 调整铺满方式、位置、遮罩、模糊和面板透明度；
-- 自动适配 DSH 的亮色/暗色主题；
-- 图片保存在当前浏览器的 IndexedDB，偏好保存在 localStorage，不上传到 DSH 服务端。
+<p align="center">
+  <strong>English</strong> · <a href="./README.zh.md">简体中文</a>
+</p>
 
-## 构建
+<p align="center">
+  <img src="./docs/images/wallpaper-blue.webp" alt="DeepSeek Harness Web with a custom blue wallpaper" width="860">
+</p>
+
+## Features
+
+- Upload or drag in multiple local images and switch between them instantly.
+- Show or hide the wallpaper, delete individual images, or clear the entire library.
+- Adjust image fit, position, overlay, blur, and panel opacity.
+- Automatically adapt to the light and dark themes in DSH.
+- Keep images in the current browser's IndexedDB and preferences in localStorage. Nothing is uploaded to the DSH server.
+
+## Preview
+
+<p align="center">
+  <img src="./docs/images/wallpaper-pink.webp" alt="DeepSeek Harness Web with a custom pink wallpaper" width="860">
+</p>
+
+<p align="center">
+  <img src="./docs/images/personalization-settings.webp" alt="Wallpaper and skin controls on the Personalization settings page" width="680">
+</p>
+
+## Install in DSH Web
+
+Run the following commands in the DeepSeek Harness repository:
+
+```sh
+pnpm dsh plugin --profile web add github:SLin-code/dsh-custom-skin
+pnpm dsh web
+```
+
+Open **Settings** in the lower-left corner of the Web interface, then select **Personalization** to add a wallpaper.
+
+To install a local development copy instead:
+
+```sh
+pnpm dsh plugin --profile web add "/absolute/path/to/dsh-custom-skin"
+pnpm dsh web
+```
+
+To uninstall:
+
+```sh
+pnpm dsh plugin --profile web remove dsh-custom-skin
+```
+
+## Build from source
+
+Requirements: Node.js 22.19 or later and pnpm 11.7.0.
 
 ```sh
 pnpm install
@@ -16,34 +64,14 @@ pnpm build
 pnpm check
 ```
 
-仓库已经包含构建后的 `lib/`，普通本地安装不需要再次构建。
+The repository includes the compiled `lib/` files, so a regular local installation does not require a rebuild.
 
-## 安装到 DSH Web
+## Data and limitations
 
-在 DeepSeek Harness 仓库中执行：
+- Each image can be up to 20 MB, with a maximum of 24 saved images. The browser's storage quota may impose a lower practical limit.
+- Wallpapers are isolated by browser and site origin. If you open DSH in another browser, on another port, or at a remote address, you will need to add the images again.
+- Clearing the site's browser data also removes the saved wallpapers.
 
-```sh
-pnpm dsh plugin --profile web add github:SLin-code/dsh-custom-skin
-pnpm dsh web
-```
+## License
 
-本地开发版本也可以直接安装：
-
-```sh
-pnpm dsh plugin --profile web add "/absolute/path/to/dsh-custom-skin"
-pnpm dsh web
-```
-
-打开 Web 页面左下角的 Settings，进入“个性化”即可上传壁纸。
-
-卸载：
-
-```sh
-pnpm dsh plugin --profile web remove dsh-custom-skin
-```
-
-## 数据与限制
-
-- 每张图片最大 20 MB，最多保存 24 张；实际容量还受浏览器配额影响。
-- 壁纸按浏览器和站点 origin 隔离。在另一个浏览器、端口或远程地址打开 DSH 时，需要重新添加图片。
-- 清理该站点的浏览器数据会同时清除壁纸。
+[MIT](./LICENSE)
