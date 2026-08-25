@@ -10,7 +10,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
   const [dragging, setDragging] = useState(false)
 
   const add = (files: FileList | null): void => {
-    if (files === null) return
+    if (files === null || !state.ready) return
     void controller.addFiles([...files])
   }
   const onInput = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -33,6 +33,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
       <label
         className="dsh-skin-drop"
         data-dragging={dragging || undefined}
+        data-disabled={!state.ready || undefined}
         onDragEnter={() => { setDragging(true) }}
         onDragLeave={() => { setDragging(false) }}
         onDragOver={(event) => { event.preventDefault() }}
@@ -40,7 +41,13 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
       >
         <strong>{t('upload')}</strong>
         <span className="dsh-skin-hint">{t('uploadHint')}</span>
-        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" multiple onChange={onInput} />
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          disabled={!state.ready}
+          multiple
+          onChange={onInput}
+        />
       </label>
 
       {state.error !== undefined && (

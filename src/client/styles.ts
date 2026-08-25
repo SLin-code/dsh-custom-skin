@@ -63,6 +63,7 @@ body[data-dsh-custom-skin='on'] #root {
   text-align: center;
 }
 .dsh-skin-drop:hover, .dsh-skin-drop[data-dragging='true'] { border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-skin-drop[data-disabled='true'] { cursor: wait; opacity: 0.65; }
 .dsh-skin-drop strong { font-size: 14px; font-weight: 550; }
 .dsh-skin-drop input { display: none; }
 

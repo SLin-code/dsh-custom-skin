@@ -90,4 +90,66 @@ describe('SkinController', () => {
     expect(controller.getSnapshot().wallpapers).toHaveLength(1)
     controller.dispose()
   })
+
+  it('waits for storage initialization before accepting an upload', async () => {
+    const openRequest = {
+      onerror: null as (() => void) | null,
+      onsuccess: null as (() => void) | null,
+      onupgradeneeded: null as (() => void) | null,
+      result: undefined as unknown,
+    }
+    Object.defineProperty(globalThis, 'indexedDB', {
+      configurable: true,
+      value: { open: () => openRequest },
+    })
+    let puts = 0
+    const database = {
+      close: vi.fn(),
+      objectStoreNames: { contains: () => true },
+      transaction: (_store: string, mode: IDBTransactionMode) => {
+        if (mode === 'readonly') {
+          const request = {
+            result: [] as unknown[],
+            onerror: null as (() => void) | null,
+            onsuccess: null as (() => void) | null,
+          }
+          return {
+            objectStore: () => ({
+              getAll: () => {
+                queueMicrotask(() => { request.onsuccess?.() })
+                return request
+              },
+            }),
+          }
+        }
+        const transaction = {
+          error: null,
+          objectStore: () => ({
+            put: () => {
+              puts += 1
+              queueMicrotask(() => { transaction.oncomplete?.() })
+            },
+          }),
+          onabort: null as (() => void) | null,
+          oncomplete: null as (() => void) | null,
+          onerror: null as (() => void) | null,
+        }
+        return transaction
+      },
+    }
+    const controller = new SkinController()
+
+    const initializing = controller.initialize()
+    const uploading = controller.addFiles([new File(['x'], 'early.png', { type: 'image/png' })])
+    await Promise.resolve()
+    expect(puts).toBe(0)
+
+    openRequest.result = database
+    openRequest.onsuccess?.()
+    await Promise.all([initializing, uploading])
+
+    expect(puts).toBe(1)
+    expect(controller.getSnapshot().wallpapers).toHaveLength(1)
+    controller.dispose()
+  })
 })

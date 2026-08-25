@@ -121,6 +121,7 @@ export class SkinController {
   private readonly originalTokens = new Map<string, { value: string; priority: string }>()
   private readonly writtenTokens = new Map<string, string>()
   private database?: IDBDatabase
+  private initialization?: Promise<void>
   private queue: Promise<void> = Promise.resolve()
   private disposed = false
   private readonly observer: MutationObserver
@@ -140,7 +141,12 @@ export class SkinController {
   }
 
   /** Load the local wallpaper library and apply the saved choice. */
-  async initialize(): Promise<void> {
+  initialize(): Promise<void> {
+    this.initialization ??= this.load()
+    return this.initialization
+  }
+
+  private async load(): Promise<void> {
     try {
       this.database = await openDatabase()
       const transaction = this.database.transaction(STORE, 'readonly')
@@ -168,8 +174,13 @@ export class SkinController {
     const valid = files.filter(file => IMAGE_TYPES.has(file.type) && file.size > 0 && file.size <= MAX_IMAGE_BYTES)
     const skipped = valid.length !== files.length
     return this.enqueue(async () => {
-      if (this.database === undefined || valid.length === 0) {
+      await this.initialization
+      if (valid.length === 0) {
         if (skipped) this.publish({ ...this.snapshot, error: 'invalid-file' })
+        return
+      }
+      if (this.database === undefined) {
+        this.publish({ ...this.snapshot, error: 'storage' })
         return
       }
       const capacity = Math.max(0, MAX_IMAGES - this.snapshot.wallpapers.length)
