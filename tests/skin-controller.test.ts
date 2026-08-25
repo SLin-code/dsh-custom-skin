@@ -5,6 +5,8 @@ import { SkinController } from '../src/client/skin-controller.ts'
 describe('SkinController', () => {
   beforeEach(() => {
     localStorage.clear()
+    document.body.removeAttribute('style')
+    document.body.removeAttribute('data-dsh-custom-skin')
     Object.defineProperty(globalThis, 'indexedDB', {
       configurable: true,
       value: new IDBFactory(),
@@ -150,6 +152,32 @@ describe('SkinController', () => {
 
     expect(puts).toBe(1)
     expect(controller.getSnapshot().wallpapers).toHaveLength(1)
+    controller.dispose()
+  })
+
+  it('does not restore stale tokens after the wallpaper is disabled', () => {
+    const token = '--dsw-alias-bg-base'
+    document.body.style.setProperty(token, 'red')
+    const controller = new SkinController()
+    const internals = controller as unknown as {
+      applyPresentation: () => void
+      snapshot: ReturnType<SkinController['getSnapshot']>
+    }
+    internals.snapshot = {
+      ...controller.getSnapshot(),
+      activeId: 'one',
+      enabled: true,
+      ready: true,
+      wallpapers: [{ id: 'one', name: 'one', url: 'blob:one', createdAt: 1 }],
+    }
+
+    internals.applyPresentation()
+    controller.setEnabled(false)
+    expect(document.body.style.getPropertyValue(token)).toBe('red')
+
+    document.body.style.setProperty(token, 'blue')
+    internals.applyPresentation()
+    expect(document.body.style.getPropertyValue(token)).toBe('blue')
     controller.dispose()
   })
 })

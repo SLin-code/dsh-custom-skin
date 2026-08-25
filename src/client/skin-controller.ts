@@ -368,11 +368,11 @@ export class SkinController {
       '--dsh-skin-image', '--dsh-skin-fit', '--dsh-skin-position', '--dsh-skin-dim',
       '--dsh-skin-blur', '--dsh-skin-fallback',
     ]) body.style.removeProperty(name)
-    for (const name of TOKENS) {
-      const original = this.originalTokens.get(name)
-      if (original === undefined || original.value === '') body.style.removeProperty(name)
+    for (const [name, original] of this.originalTokens) {
+      if (original.value === '') body.style.removeProperty(name)
       else body.style.setProperty(name, original.value, original.priority)
     }
+    this.originalTokens.clear()
     this.writtenTokens.clear()
   }
 }
