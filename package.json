@@ -7,6 +7,17 @@
     "type": "git",
     "url": "git+https://github.com/SLin-code/dsh-custom-skin.git"
   },
+  "homepage": "https://github.com/SLin-code/dsh-custom-skin#readme",
+  "bugs": {
+    "url": "https://github.com/SLin-code/dsh-custom-skin/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "wallpaper",
+    "theme",
+    "web-ui"
+  ],
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -47,15 +58,22 @@
   },
   "devDependencies": {
     "@types/react": "~18.3.1",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.0",
     "fake-indexeddb": "^6.2.4",
     "jsdom": "^29.1.1",
     "react": "^18.2.0",
     "typescript": "^5.9.0",
     "vitest": "^4.1.8"
   },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-locale": ">=0.1.0-rc.7 <0.2.0-0 || >=0.1.1-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-client-runtime": ">=0.1.0-rc.7 <0.2.0-0 || >=0.1.1-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.0-rc.7 <0.2.0-0 || >=0.1.1-rc.1 <0.2.0-0",
+    "@deepseek-ai/dsh-client-ui-settings-general": ">=0.1.0-rc.7 <0.2.0-0 || >=0.1.1-rc.1 <0.2.0-0",
+    "react": "^18.2.0"
+  },
   "license": "MIT",
   "engines": {
-    "node": ">=22.19"
+    "node": "^22.19.0 || >=24.0.0"
   }
 }
