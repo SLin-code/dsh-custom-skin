@@ -63,9 +63,18 @@ body[data-dsh-custom-skin='on'] #root {
   text-align: center;
 }
 .dsh-skin-drop:hover, .dsh-skin-drop[data-dragging='true'] { border-color: var(--dsw-alias-brand-primary); background: var(--dsw-alias-interactive-bg-hover); }
+.dsh-skin-drop:focus-within { outline: 2px solid var(--dsw-alias-brand-primary); outline-offset: 2px; }
 .dsh-skin-drop[data-disabled='true'] { cursor: wait; opacity: 0.65; }
 .dsh-skin-drop strong { font-size: 14px; font-weight: 550; }
-.dsh-skin-drop input { display: none; }
+.dsh-skin-drop input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 .dsh-skin-grid {
   display: grid;

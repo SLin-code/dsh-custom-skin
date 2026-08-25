@@ -24,7 +24,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
   }
 
   return (
-    <section className="dsh-skin-section">
+    <section className="dsh-skin-section" aria-busy={!state.ready}>
       <div>
         <h2>{t('title')}</h2>
         <p className="dsh-skin-intro">{t('intro')}</p>
@@ -32,6 +32,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
 
       <label
         className="dsh-skin-drop"
+        aria-disabled={!state.ready}
         data-dragging={dragging || undefined}
         data-disabled={!state.ready || undefined}
         onDragEnter={() => { setDragging(true) }}
@@ -44,6 +45,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          aria-label={t('upload')}
           disabled={!state.ready}
           multiple
           onChange={onInput}
