@@ -1,5 +1,5 @@
 import { IDBFactory } from 'fake-indexeddb'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SkinController } from '../src/client/skin-controller.ts'
 
 describe('SkinController', () => {
@@ -8,6 +8,14 @@ describe('SkinController', () => {
     Object.defineProperty(globalThis, 'indexedDB', {
       configurable: true,
       value: new IDBFactory(),
+    })
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(() => 'blob:test-wallpaper'),
+    })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
     })
   })
 
@@ -37,6 +45,49 @@ describe('SkinController', () => {
       blur: 0,
       surface: 10,
     })
+    controller.dispose()
+  })
+
+  it('recovers the operation queue after a storage mutation fails', async () => {
+    const controller = new SkinController()
+    let transactionCount = 0
+    const database = {
+      close: vi.fn(),
+      transaction: () => {
+        transactionCount += 1
+        if (transactionCount === 1) {
+          const transaction = {
+            error: new Error('forced deletion failure'),
+            objectStore: () => ({
+              delete: () => { queueMicrotask(() => { transaction.onerror?.(new Event('error')) }) },
+            }),
+            onabort: null as ((event: Event) => void) | null,
+            oncomplete: null as ((event: Event) => void) | null,
+            onerror: null as ((event: Event) => void) | null,
+          }
+          return transaction
+        }
+        const transaction = {
+          error: null,
+          objectStore: () => ({
+            put: () => { queueMicrotask(() => { transaction.oncomplete?.(new Event('complete')) }) },
+          }),
+          onabort: null as ((event: Event) => void) | null,
+          oncomplete: null as ((event: Event) => void) | null,
+          onerror: null as ((event: Event) => void) | null,
+        }
+        return transaction
+      },
+    }
+    ;(controller as unknown as { database: typeof database }).database = database
+
+    await controller.remove('missing')
+    expect(controller.getSnapshot().error).toBe('mutation')
+
+    await controller.addFiles([new File(['x'], 'valid.png', { type: 'image/png' })])
+    expect(transactionCount).toBe(2)
+    expect(controller.getSnapshot()).toMatchObject({ error: undefined })
+    expect(controller.getSnapshot().wallpapers).toHaveLength(1)
     controller.dispose()
   })
 })

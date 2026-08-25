@@ -45,7 +45,13 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
 
       {state.error !== undefined && (
         <p className="dsh-skin-error" role="alert">
-          {t(state.error === 'storage' ? 'storageError' : state.error === 'invalid-file' ? 'invalidFile' : 'uploadError')}
+          {t(state.error === 'storage'
+            ? 'storageError'
+            : state.error === 'invalid-file'
+              ? 'invalidFile'
+              : state.error === 'mutation'
+                ? 'mutationError'
+                : 'uploadError')}
         </p>
       )}
 

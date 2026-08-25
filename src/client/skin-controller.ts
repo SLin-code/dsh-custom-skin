@@ -38,7 +38,7 @@ interface SkinPreferences {
 
 export interface SkinSnapshot extends SkinPreferences {
   ready: boolean
-  error?: 'storage' | 'invalid-file' | 'upload'
+  error?: 'storage' | 'invalid-file' | 'upload' | 'mutation'
   wallpapers: readonly WallpaperSummary[]
 }
 
@@ -167,42 +167,37 @@ export class SkinController {
   addFiles(files: readonly File[]): Promise<void> {
     const valid = files.filter(file => IMAGE_TYPES.has(file.type) && file.size > 0 && file.size <= MAX_IMAGE_BYTES)
     const skipped = valid.length !== files.length
-    this.queue = this.queue.then(async () => {
+    return this.enqueue(async () => {
       if (this.database === undefined || valid.length === 0) {
         if (skipped) this.publish({ ...this.snapshot, error: 'invalid-file' })
         return
       }
-      try {
-        const capacity = Math.max(0, MAX_IMAGES - this.snapshot.wallpapers.length)
-        const accepted = valid.slice(0, capacity)
-        const transaction = this.database.transaction(STORE, 'readwrite')
-        const records = accepted.map((file, index): WallpaperRecord => ({
-          id: makeId(),
-          name: file.name,
-          type: file.type,
-          blob: file,
-          createdAt: Date.now() + index,
-        }))
-        for (const record of records) transaction.objectStore(STORE).put(record)
-        await transactionDone(transaction)
-        const added = records.map(record => ({
-          id: record.id,
-          name: record.name,
-          createdAt: record.createdAt,
-          url: this.createUrl(record.id, record.blob),
-        })).reverse()
-        this.publish({
-          ...this.snapshot,
-          activeId: this.snapshot.activeId ?? added[0]?.id,
-          error: skipped || accepted.length !== valid.length ? 'invalid-file' : undefined,
-          wallpapers: [...added, ...this.snapshot.wallpapers],
-        })
-        this.persist()
-      } catch {
-        this.publish({ ...this.snapshot, error: 'upload' })
-      }
-    })
-    return this.queue
+      const capacity = Math.max(0, MAX_IMAGES - this.snapshot.wallpapers.length)
+      const accepted = valid.slice(0, capacity)
+      const transaction = this.database.transaction(STORE, 'readwrite')
+      const records = accepted.map((file, index): WallpaperRecord => ({
+        id: makeId(),
+        name: file.name,
+        type: file.type,
+        blob: file,
+        createdAt: Date.now() + index,
+      }))
+      for (const record of records) transaction.objectStore(STORE).put(record)
+      await transactionDone(transaction)
+      const added = records.map(record => ({
+        id: record.id,
+        name: record.name,
+        createdAt: record.createdAt,
+        url: this.createUrl(record.id, record.blob),
+      })).reverse()
+      this.publish({
+        ...this.snapshot,
+        activeId: this.snapshot.activeId ?? added[0]?.id,
+        error: skipped || accepted.length !== valid.length ? 'invalid-file' : undefined,
+        wallpapers: [...added, ...this.snapshot.wallpapers],
+      })
+      this.persist()
+    }, 'upload')
   }
 
   /** Select one saved image. */
@@ -213,7 +208,7 @@ export class SkinController {
 
   /** Delete one saved image. */
   remove(id: string): Promise<void> {
-    this.queue = this.queue.then(async () => {
+    return this.enqueue(async () => {
       if (this.database === undefined) return
       const transaction = this.database.transaction(STORE, 'readwrite')
       transaction.objectStore(STORE).delete(id)
@@ -229,13 +224,12 @@ export class SkinController {
         error: undefined,
       })
       this.persist()
-    })
-    return this.queue
+    }, 'mutation')
   }
 
   /** Delete the complete local image library. */
   clear(): Promise<void> {
-    this.queue = this.queue.then(async () => {
+    return this.enqueue(async () => {
       if (this.database === undefined) return
       const transaction = this.database.transaction(STORE, 'readwrite')
       transaction.objectStore(STORE).clear()
@@ -244,8 +238,7 @@ export class SkinController {
       this.objectUrls.clear()
       this.publish({ ...this.snapshot, activeId: undefined, wallpapers: [], error: undefined })
       this.persist()
-    })
-    return this.queue
+    }, 'mutation')
   }
 
   setEnabled(enabled: boolean): void { this.update({ enabled }) }
@@ -275,6 +268,18 @@ export class SkinController {
   private update(patch: Partial<SkinPreferences & Pick<SkinSnapshot, 'error'>>): void {
     this.publish({ ...this.snapshot, ...patch })
     this.persist()
+  }
+
+  private enqueue(operation: () => Promise<void>, error: 'upload' | 'mutation'): Promise<void> {
+    this.queue = this.queue.catch(() => {}).then(async () => {
+      if (this.disposed) return
+      try {
+        await operation()
+      } catch {
+        this.publish({ ...this.snapshot, error })
+      }
+    })
+    return this.queue
   }
 
   private publish(snapshot: SkinSnapshot): void {

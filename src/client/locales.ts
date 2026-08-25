@@ -29,6 +29,7 @@ export const en = {
   storageError: 'This browser could not open local image storage.',
   invalidFile: 'Some files were skipped because they were not supported images or exceeded 20 MB.',
   uploadError: 'The image could not be saved. Browser storage may be full.',
+  mutationError: 'The local wallpaper library could not be updated.',
 } as const
 
 export const zh: Record<keyof typeof en, string> = {
@@ -60,4 +61,5 @@ export const zh: Record<keyof typeof en, string> = {
   storageError: '当前浏览器无法打开本地图片存储。',
   invalidFile: '部分文件不是支持的图片格式或超过 20 MB，已跳过。',
   uploadError: '图片保存失败，浏览器存储空间可能已满。',
+  mutationError: '本地壁纸库更新失败。',
 }
