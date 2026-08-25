@@ -22,6 +22,12 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
     setDragging(false)
     add(event.dataTransfer.files)
   }
+  const remove = (id: string): void => {
+    if (window.confirm(t('removeConfirm'))) void controller.remove(id)
+  }
+  const clear = (): void => {
+    if (window.confirm(t('clearConfirm'))) void controller.clear()
+  }
 
   return (
     <section className="dsh-skin-section" aria-busy={!state.ready}>
@@ -74,12 +80,18 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
                 const active = item.id === state.activeId
                 return (
                   <article className="dsh-skin-card" data-active={active || undefined} key={item.id}>
-                    <img className="dsh-skin-thumb" src={item.url} alt={item.name} />
+                    <img
+                      className="dsh-skin-thumb"
+                      src={item.url}
+                      alt={item.name}
+                      decoding="async"
+                      loading={active ? 'eager' : 'lazy'}
+                    />
                     {active && <span className="dsh-skin-badge">{t('active')}</span>}
                     <div className="dsh-skin-card-body">
                       <span className="dsh-skin-name" title={item.name}>{item.name}</span>
                       {!active && <button className="dsh-skin-button" type="button" onClick={() => { controller.select(item.id) }}>{t('use')}</button>}
-                      <button className="dsh-skin-button dsh-skin-button-danger" type="button" onClick={() => { void controller.remove(item.id) }}>{t('remove')}</button>
+                      <button className="dsh-skin-button dsh-skin-button-danger" type="button" onClick={() => { remove(item.id) }}>{t('remove')}</button>
                     </div>
                   </article>
                 )
@@ -129,7 +141,7 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
       <div className="dsh-skin-actions">
         <button className="dsh-skin-button" type="button" onClick={() => { controller.reset() }}>{t('reset')}</button>
         {state.wallpapers.length > 0 && (
-          <button className="dsh-skin-button dsh-skin-button-danger" type="button" onClick={() => { void controller.clear() }}>{t('clear')}</button>
+          <button className="dsh-skin-button dsh-skin-button-danger" type="button" onClick={clear}>{t('clear')}</button>
         )}
       </div>
     </section>
