@@ -20,12 +20,16 @@
     "lib/client.js",
     "lib/client.js.map",
     "cordis.patch.yml",
-    "README.md"
+    "docs/images/*.webp",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node scripts/check.mjs",
-    "test": "vitest run"
+    "check": "pnpm typecheck && pnpm test && pnpm build && node scripts/check.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
   },
   "dsh": {
     "bundle": {
