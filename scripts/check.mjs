@@ -6,10 +6,11 @@ const client = await readFile('lib/client.js', 'utf8')
 const host = await readFile('lib/index.js', 'utf8')
 const readme = await readFile('README.md', 'utf8')
 const readmeZh = await readFile('README.zh.md', 'utf8')
+const screenshots = JSON.parse(await readFile('screenshots.json', 'utf8'))
 const previewPaths = [
   'docs/images/wallpaper-blue.webp',
-  'docs/images/wallpaper-pink.webp',
   'docs/images/personalization-settings.webp',
+  'docs/images/wallpaper-pink.webp',
 ]
 await Promise.all(previewPaths.map(path => readFile(path)))
 
@@ -24,6 +25,9 @@ const checks = [
   [host.includes('function apply'), 'host plugin export'],
   [manifest.files?.includes('docs/images/*.webp'), 'packaged preview images'],
   [manifest.files?.includes('README.zh.md'), 'packaged Chinese README'],
+  [manifest.files?.includes('screenshots.json'), 'packaged screenshot manifest'],
+  [Array.isArray(screenshots) && screenshots.length === previewPaths.length
+    && screenshots.every((path, index) => path === previewPaths[index]), 'screenshot manifest'],
   [previewPaths.every(path => readme.includes(`./${path}`)), 'English README previews'],
   [previewPaths.every(path => readmeZh.includes(`./${path}`)), 'Chinese README previews'],
 ]
