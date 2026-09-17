@@ -27,6 +27,6 @@ export function apply(ctx: ClientContext): void {
     order: 12,
     label: () => t('nav'),
     locale: NS,
-    inject: () => ({ controller, hooks: { skin: controller } }),
+    inject: () => ({ controller, locale: ctx.locale, hooks: { skin: controller } }),
   }, SkinSection))
 }

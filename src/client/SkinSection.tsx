@@ -1,12 +1,17 @@
 /** Wallpaper library and skin controls rendered in DSH settings. */
 
-import { useState, type ChangeEvent, type DragEvent } from 'react'
+import { useState, useSyncExternalStore, type ChangeEvent, type DragEvent } from 'react'
 import type { SkinSectionProps } from './contracts.ts'
 import type { ImageFit, ImagePosition } from './skin-controller.ts'
 
 /** Render the complete wallpaper settings page. */
-export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
+export function SkinSection({ t, useSkin, controller, locale }: SkinSectionProps) {
   const state = useSkin(snapshot => snapshot)
+  const localeState = useSyncExternalStore(
+    listener => locale.subscribe(listener),
+    () => locale.getSnapshot(),
+    () => locale.getSnapshot(),
+  )
   const [dragging, setDragging] = useState(false)
 
   const add = (files: FileList | null): void => {
@@ -35,6 +40,22 @@ export function SkinSection({ t, useSkin, controller }: SkinSectionProps) {
         <h2>{t('title')}</h2>
         <p className="dsh-skin-intro">{t('intro')}</p>
       </div>
+
+      <label className="dsh-skin-language">
+        <span className="dsh-skin-toggle-copy">
+          <span>{t('language')}</span>
+          <small className="dsh-skin-hint">{t('languageHint')}</small>
+        </span>
+        <select
+          aria-label={t('language')}
+          value={localeState.active}
+          onChange={(event) => { locale.setLocale(event.target.value) }}
+        >
+          {localeState.locales.map(option => (
+            <option key={option.id} value={option.id}>{option.label}</option>
+          ))}
+        </select>
+      </label>
 
       <label
         className="dsh-skin-drop"

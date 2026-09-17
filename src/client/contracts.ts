@@ -14,11 +14,29 @@ export interface SkinSectionProps {
   t: Translate
   useSkin: SnapshotSelector
   controller: SkinController
+  locale: LocaleController
   close: () => void
 }
 
+export interface LocaleDefinition {
+  id: string
+  label: string
+}
+
+export interface LocaleSnapshot {
+  active: string
+  locales: readonly LocaleDefinition[]
+  revision: number
+}
+
+export interface LocaleController {
+  getSnapshot: () => LocaleSnapshot
+  subscribe: (listener: () => void) => () => void
+  setLocale: (id: string) => void
+}
+
 export interface ClientContext {
-  locale: {
+  locale: LocaleController & {
     register: (namespace: string, dictionaries: { zh: LocaleTable; en: LocaleTable }) => () => void
     bind: (namespace: string) => Translate
   }

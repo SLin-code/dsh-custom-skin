@@ -15,6 +15,7 @@
 ## Features
 
 - Upload or drag in multiple local images and switch between them instantly.
+- Choose Chinese or English from the plugin page; the selection updates all of DSH Web and uses DSH's saved language preference.
 - Show or hide the wallpaper, delete individual images, or clear the entire library.
 - Adjust image fit, position, overlay, blur, and panel opacity.
 - Automatically adapt to the light and dark themes in DSH.
@@ -39,7 +40,7 @@ pnpm dsh plugin --profile web add github:SLin-code/dsh-custom-skin
 pnpm dsh web
 ```
 
-Open **Settings** in the lower-left corner of the Web interface, then select **Personalization** to add a wallpaper.
+Open **Settings** in the lower-left corner of the Web interface, then select **Personalization** to add a wallpaper or switch the interface between **English** and **Chinese**.
 
 To install a local development copy instead:
 
